@@ -1,5 +1,6 @@
 package com.atguigu.mytext.fragment;
 
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.zhy.http.okhttp.callback.StringCallback;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import okhttp3.Call;
 
 /**
  * Created by 呼学成 on 09/03/2017.
@@ -61,7 +63,7 @@ public class HomeFragment extends BaseFragment {
                 .build()
                 .execute(new StringCallback() {
                     @Override
-                    public void onError(okhttp3.Call call, Exception e, int id) {
+                    public void onError(Call call, Exception e, int id) {
                         Log.e("TAG", "主页联网失败" + e.getMessage());
                     }
 
@@ -78,9 +80,29 @@ public class HomeFragment extends BaseFragment {
         result = homeBean.getResult();//获取解析之后的数据,设置适配器
         if(result!=null){
             HomeAdapter adapter = new HomeAdapter(mcontext,result);
+            rvHome.setAdapter(adapter);
+            //设置布局管理器
+            GridLayoutManager manager = new GridLayoutManager(mcontext,1);
+            //设置监听跨度
+            manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    if(position <=3){
+                        //隐藏按钮
+                        ibTop.setVisibility(View.GONE);
+                    }else{
+                        //显示按钮
+                        ibTop.setVisibility(View.VISIBLE);
+                    }
+                    return 1;//这个只能是1
+                }
+            });
+            rvHome.setLayoutManager(manager);
+
+
+        }else{
+            Toast.makeText(mcontext, "没有请求到数据", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
     private HomeBean paraseJson(String response) {
